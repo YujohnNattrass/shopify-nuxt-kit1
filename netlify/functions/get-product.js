@@ -13,7 +13,8 @@
  * ```
  */
 
-const { postToShopify } = require('./utils/postToShopify')
+const { postToConnect } = require('./utils/postToConnect')
+// const { postToShopify } = require('./utils/postToShopify')
 
 exports.handler = async (event) => {
   const { itemHandle } = JSON.parse(event.body)
@@ -22,49 +23,41 @@ exports.handler = async (event) => {
     console.log('--------------------------------')
     console.log('Retrieving product details...')
     console.log('--------------------------------')
-    const shopifyResponse = await postToShopify({
-      query: `
-        query getProduct($handle: String!) {
-          productByHandle(handle: $handle) {
+    const connectResponse = await postToConnect({
+      query: `query getProductList($handle: String!) {
+        shopifyProduct(handle: {eq: $handle }) {
+          id
+          handle
+          description
+          title
+          totalInventory
+          variants {
             id
-            handle
-            description
             title
-            totalInventory
-            variants(first: 5) {
-              edges {
-                node {
-                  id
-                  title
-                  quantityAvailable
-                  priceV2 {
-                    amount
-                    currencyCode
-                  }
-                }
-              }
-            }
-            priceRange {
-              maxVariantPrice {
+            inventoryQuantity
+            presentmentPrices {
+              price {
                 amount
                 currencyCode
-              }
-              minVariantPrice {
-                amount
-                currencyCode
-              }
-            }
-            images(first: 1) {
-              edges {
-                node {
-                  src
-                  altText
-                }
               }
             }
           }
+          priceRangeV2 {
+            maxVariantPrice {
+              amount
+              currencyCode
+            }
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
+          featuredImage {
+            src
+            altText
+          }
         }
-      `,
+      }`,
       variables: {
         handle: itemHandle,
       },
@@ -72,9 +65,9 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 200,
-      body: JSON.stringify(shopifyResponse),
+      body: JSON.stringify(connectResponse),
     }
   } catch (error) {
-    console.log(error)
+    console.log(JSON.stringify(error, null, 2))
   }
 }

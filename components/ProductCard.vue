@@ -8,7 +8,7 @@ export default {
   },
   computed: {
     featuredImage() {
-      return this.product.images.edges[0].node
+      return this.product.featuredImage
     },
     shortDescription() {
       return this.product.description.substring(0, 60) + '...'

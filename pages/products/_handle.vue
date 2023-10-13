@@ -8,7 +8,7 @@ export default {
     })
 
     return {
-      product: productData.productByHandle,
+      product: productData,
     }
   },
   data: () => ({
@@ -23,27 +23,27 @@ export default {
       cartId: 'cart/id',
     }),
     featuredImage() {
-      return this.product.images.edges[0].node
+      return this.product.shopifyProduct.featuredImage
     },
     maxQuantity() {
       if (this.selectedProduct) {
-        return this.selectedProduct.node.quantityAvailable
+        return this.selectedProduct.inventoryQuantity
       } else {
         return 0
       }
     },
     productVariants() {
-      return this.product.variants.edges
+      return this.product.shopifyProduct.variants
     },
     selectedProduct() {
-      return this.product.variants.edges.find((item) => {
-        return item.node.id === this.selectedProductId
+      return this.product.shopifyProduct.variants.find((item) => {
+        return item.id === this.selectedProductId
       })
     },
   },
   mounted() {
     // Set default selected item
-    this.selectedProductId = this.productVariants[0].node.id
+    this.selectedProductId = this.productVariants[0].id
 
     // Get local cart
     const localCart = window.localStorage.getItem('shopifyNuxtCart')
@@ -102,25 +102,26 @@ export default {
                   type="radio"
                   name="merchandiseId"
                   :value="variant.id"
-                  :disabled="variant.quantityAvailable === 0"
+                  :disabled="variant.inventoryQuantity === 0"
                 />
                 <label :for="variant.id">
-                  {{ variant.title }} - {{ currency(variant.priceV2) }}
-                  <span v-if="variant.quantityAvailable > 10">(10+ left)</span>
-                  <span v-else-if="variant.quantityAvailable > 0">
-                    (Only {{ variant.quantityAvailable }} left)
+                  {{ variant.title }} -
+                  {{ currency(variant.presentmentPrices[0].price) }}
+                  <span v-if="variant.inventoryQuantity > 10">(10+ left)</span>
+                  <span v-else-if="variant.inventoryQuantity > 0">
+                    (Only {{ variant.inventoryQuantity }} left)
                   </span>
                   <span v-else> (Bummer. It's sold out!) </span>
                 </label>
               </div>
             </div>
             <div v-else class="product-page-price is-solo">
-              {{ currency(productVariants[0].node.priceV2) }}
-              <span v-if="productVariants[0].node.quantityAvailable > 10">
+              {{ currency(productVariants[0].presentmentPrices[0].price) }}
+              <span v-if="productVariants[0].inventoryQuantity > 10">
                 (10+ left)
               </span>
-              <span v-else-if="productVariants[0].node.quantityAvailable > 0">
-                (Only {{ productVariants[0].node.quantityAvailable }} left)
+              <span v-else-if="productVariants[0].inventoryQuantity > 0">
+                (Only {{ productVariants[0].inventoryQuantity }} left)
               </span>
               <span v-else> (Bummer. It's sold out!) </span>
             </div>

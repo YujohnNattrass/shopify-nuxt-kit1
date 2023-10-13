@@ -4,7 +4,7 @@ export default {
     const productListResponse = await $http.$post('/api/get-product-list')
 
     return {
-      productList: productListResponse.products.edges,
+      productList: productListResponse.allShopifyProduct.edges,
     }
   },
   head: () => ({
